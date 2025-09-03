@@ -5,5 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.99"
+configparser = "3.1.0"
+dirs = "6.0.0"
 log = "0.4.27"
 simplelog = "0.12.2"
