@@ -4,6 +4,7 @@ mod config;
 mod logger;
 mod mdns;
 mod server;
+mod tray;
 mod utils;
 
 fn main() {
@@ -14,4 +15,6 @@ fn main() {
     mdns::publish_service(&config.name, config.port).log_and_exit("Failed to publish mDNS service");
 
     server::publish_server(config.port, config.path).log_and_exit("Failed to publish API server");
+
+    tray::start_gui_tray().log_and_exit("Failed to start tray");
 }
