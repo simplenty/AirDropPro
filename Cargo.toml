@@ -20,3 +20,18 @@ rouille = "3.6.2"
 simplelog = "0.12.2"
 tao = "0.34.3"
 tray-icon = "0.21.1"
+
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+
+[package.metadata.deb]
+name = "AirDropPro"
+maintainer = "Simplenty <simplenty@icloud.com>"
+copyright = "file://LICENSE"
+depends = ["libgtk-3-dev", "libxdo-dev", "libayatana-appindicator3-dev"]
+section = "utilities"
+assets = [
+    ["target/release/AirDropPro", "/usr/bin/", "755"]
+]

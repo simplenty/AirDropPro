@@ -1,8 +1,9 @@
-use std::path::{Path, PathBuf};
-use anyhow::{Result, Context};
+use crate::utils::resolve_base_directory;
+use anyhow::{Context, Result};
 use configparser::ini::Ini;
 use log::info;
-use crate::utils::resolve_base_directory;
+use std::fs::{create_dir_all, write};
+use std::path::PathBuf;
 
 pub struct Config {
     pub name: String,
@@ -11,14 +12,32 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let path_ref = path.as_ref();
-        info!("\u{256D} Loading configuration from {:?}.", path_ref);
+    pub fn new() -> Result<Self> {
+        let mut config_path =
+            dirs::config_dir().context("Failed to get standard config directory")?;
+        config_path.push("AirDropPro");
+        create_dir_all(&config_path)
+            .with_context(|| format!("Failed to create config path: {:?}", config_path))?;
+        config_path.push("config.ini");
+
+        info!("\u{256D} Loading config on path {:?}.", config_path.display());
+        if !config_path.exists() {
+            info!("Failed to: {:?}", config_path);
+            const DEFAULT_CONFIG_BYTES: &[u8] = include_bytes!("../config.ini");
+            let default_config_str = str::from_utf8(DEFAULT_CONFIG_BYTES)
+                .context("Failed to decode default config string with UTF-8")?;
+            write(&config_path, default_config_str).with_context(|| {
+                format!(
+                    "Failed to write the default config into path {:?}",
+                    config_path
+                )
+            })?;
+        }
 
         let mut ini = Ini::new();
-        ini.load(path_ref)
+        ini.load(&config_path)
             .map_err(|error| anyhow::anyhow!(error))
-            .with_context(|| format!("Failed to load config file from {:?}", path_ref))?;
+            .with_context(|| format!("Failed to load config file from {:?}", config_path))?;
 
         let name = ini
             .get("Server", "name")
