@@ -8,7 +8,7 @@ mod tray;
 mod utils;
 
 fn main() {
-    logger::initialize("app.log");
+    logger::initialize();
 
     let config = config::Config::new().log_and_exit("Failed to load config");
 

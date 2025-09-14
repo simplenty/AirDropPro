@@ -1,8 +1,7 @@
 use anyhow::{Error, Result};
 use log::LevelFilter;
 use simplelog::{Config, WriteLogger};
-use std::fs::OpenOptions;
-use std::path::Path;
+use std::fs::{OpenOptions, create_dir_all};
 use std::process;
 
 pub trait LogAndExit<T> {
@@ -21,12 +20,18 @@ impl<T> LogAndExit<T> for Result<T, Error> {
     }
 }
 
-pub fn initialize<P: AsRef<Path>>(path: P) {
+pub fn initialize() {
+    let mut logger_path = dirs::config_dir().expect("Failed to get standard config directory");
+    logger_path.push("AirDropPro");
+    create_dir_all(&logger_path)
+        .expect(format!("Failed to create config path: {:?}", logger_path).as_str());
+    logger_path.push("app.log");
+
     let log_file = OpenOptions::new()
         .write(true)
         .truncate(true)
         .create(true)
-        .open(path)
+        .open(logger_path)
         .expect("Failed to open or create log file");
 
     WriteLogger::init(LevelFilter::Info, Config::default(), log_file)
