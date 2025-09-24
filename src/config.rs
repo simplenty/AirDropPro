@@ -1,8 +1,8 @@
-use crate::utils::resolve_base_directory;
+use crate::utils::{get_config_path, resolve_base_directory};
 use anyhow::{Context, Result};
 use configparser::ini::Ini;
 use log::info;
-use std::fs::{create_dir_all, write};
+use std::fs::write;
 use std::path::PathBuf;
 
 pub struct Config {
@@ -13,13 +13,7 @@ pub struct Config {
 
 impl Config {
     pub fn new() -> Result<Self> {
-        let mut config_path =
-            dirs::config_dir().context("Failed to get standard config directory")?;
-        config_path.push("AirDropPro");
-        create_dir_all(&config_path)
-            .with_context(|| format!("Failed to create config path: {:?}", config_path))?;
-        config_path.push("config.ini");
-
+        let config_path = get_config_path().context("Failed to get config path")?;
         info!("\u{256D} Loading config on path {:?}.", config_path.display());
         if !config_path.exists() {
             info!("Failed to: {:?}", config_path);
@@ -59,10 +53,6 @@ impl Config {
         let path = resolve_base_directory(&path).context("Failed to generate download path")?;
 
         info!("\u{2570} Configuration loaded successfully!");
-        Ok(Self {
-            name,
-            port,
-            path,
-        })
+        Ok(Self { name, port, path })
     }
 }
