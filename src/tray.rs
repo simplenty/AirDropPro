@@ -1,6 +1,7 @@
+use crate::utils::get_config_path;
 use anyhow::{Context, Result};
 use image::ImageFormat;
-use log::info;
+use log::{error, info};
 use tao::{
     event::Event,
     event_loop::{ControlFlow, EventLoopBuilder},
@@ -38,7 +39,9 @@ pub fn start_gui_tray() -> Result<()> {
         .context("Failed to create icon from RGBA data.")?;
 
     let tray_menu = Menu::new();
+    let open_item = MenuItem::new("Open Config File", true, None);
     let quit_item = MenuItem::new("Quit", true, None);
+    tray_menu.append(&open_item).ok();
     tray_menu.append(&quit_item).ok();
 
     let _tray_icon = TrayIconBuilder::new()
@@ -56,6 +59,15 @@ pub fn start_gui_tray() -> Result<()> {
                 }
                 UserEvent::MenuEvent(menu_event) => {
                     info!("\u{25CF} Received menu event: {:?}", menu_event);
+                    if menu_event.id == open_item.id() {
+                        if let Ok(config_path) = get_config_path() {
+                            if let Err(error) = opener::open(config_path) {
+                                error!("Failed to open tray config file: {}", error);
+                            }
+                        } else {
+                            error!("Failed to get config path.");
+                        }
+                    }
                     if menu_event.id == quit_item.id() {
                         *control_flow = ControlFlow::Exit;
                     }

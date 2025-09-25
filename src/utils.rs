@@ -50,6 +50,16 @@ pub fn create_unique_file_path<P: AsRef<Path>>(base_dir: P, file_name: &str) -> 
     Ok(unique_path)
 }
 
+pub fn get_config_path() -> Result<PathBuf> {
+    let mut config_path =
+        dirs::config_dir().context("Failed to get standard config directory")?;
+    config_path.push("AirDropPro");
+    create_dir_all(&config_path)
+        .with_context(|| format!("Failed to create config path: {:?}", config_path))?;
+    config_path.push("config.ini");
+    Ok(config_path)
+}
+
 pub fn base64_encode(input: &str) -> Result<String> {
     Ok(general_purpose::URL_SAFE.encode(input.as_bytes()))
 }
