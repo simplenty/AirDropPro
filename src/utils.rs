@@ -1,12 +1,14 @@
-use std::fs::create_dir_all;
-use std::io::Cursor;
 use anyhow::{Context, Result};
-use std::path::{Path, PathBuf};
 use arboard::ImageData;
-use image::{ImageBuffer, ImageFormat, Rgba};
 use base64::Engine;
 use base64::engine::general_purpose;
+use env::current_exe;
+use image::{ImageBuffer, ImageFormat, Rgba};
 use rouille::percent_encoding::percent_encode;
+use std::env;
+use std::fs::create_dir_all;
+use std::io::Cursor;
+use std::path::{Path, PathBuf};
 
 pub fn resolve_base_directory(dir_name: &str) -> Result<PathBuf> {
     match dir_name {
@@ -17,7 +19,7 @@ pub fn resolve_base_directory(dir_name: &str) -> Result<PathBuf> {
         "document" => dirs::document_dir(),
         _ => return Ok(PathBuf::from(dir_name)),
     }
-        .with_context(|| format!("Could not find the {:?} directory.", dir_name))
+    .with_context(|| format!("Could not find the {:?} directory.", dir_name))
 }
 
 pub fn create_unique_file_path<P: AsRef<Path>>(base_dir: P, file_name: &str) -> Result<PathBuf> {
@@ -51,8 +53,7 @@ pub fn create_unique_file_path<P: AsRef<Path>>(base_dir: P, file_name: &str) -> 
 }
 
 pub fn get_config_path() -> Result<PathBuf> {
-    let mut config_path =
-        dirs::config_dir().context("Failed to get standard config directory")?;
+    let mut config_path = dirs::config_dir().context("Failed to get standard config directory")?;
     config_path.push("AirDropPro");
     create_dir_all(&config_path)
         .with_context(|| format!("Failed to create config path: {:?}", config_path))?;
@@ -79,7 +80,7 @@ pub fn encode_image_to_base64_png(image_data: ImageData) -> Result<String> {
         image_data.height as u32,
         image_data.bytes.as_ref(),
     )
-        .context("Failed to create image buffer from raw data. The dimensions might be wrong.")?;
+    .context("Failed to create image buffer from raw data. The dimensions might be wrong.")?;
     let mut bytes: Vec<u8> = Vec::new();
     let mut cursor = Cursor::new(&mut bytes);
     img_buf
@@ -95,4 +96,29 @@ pub fn clean_path_string(path: &str) -> &str {
 
 pub fn url_encode(input: &str) -> String {
     percent_encode(input.as_bytes(), rouille::DEFAULT_ENCODE_SET).to_string()
+}
+
+pub fn set_auto_startup(status: bool) -> Result<()> {
+    let app_path = current_exe().context("Failed to get current executable path")?;
+    let app_path = app_path.to_str().context("Failed to get absolute path")?;
+    let auto_launch = auto_launch::AutoLaunchBuilder::new()
+        .set_app_name("AirDropPro")
+        .set_app_path(app_path)
+        .build()
+        .context("Failed to build auto launch manager")?;
+    let current_status = auto_launch
+        .is_enabled()
+        .context("Failed to get autolaunch status")?;
+    if status != current_status {
+        if status {
+            auto_launch
+                .enable()
+                .context("Failed to enable autolaunch")?;
+        } else {
+            auto_launch
+                .disable()
+                .context("Failed to disable autolaunch")?;
+        }
+    }
+    Ok(())
 }

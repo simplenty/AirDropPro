@@ -1,4 +1,4 @@
-use crate::utils::{get_config_path, resolve_base_directory};
+use crate::utils::{get_config_path, resolve_base_directory, set_auto_startup};
 use anyhow::{Context, Result};
 use configparser::ini::Ini;
 use log::info;
@@ -51,6 +51,16 @@ impl Config {
             .get("Application", "download path")
             .context("Config missing 'path' key in [Application] section")?;
         let path = resolve_base_directory(&path).context("Failed to generate download path")?;
+
+        let auto_launch = ini
+            .get("Application", "auto launch")
+            .context("Config missing 'auto launch' key in [Application] section")?;
+        let auto_launch = match auto_launch.as_str() {
+            "true" | "t" | "yes" | "y" | "1" | "on" => Some(true),
+            "false" | "f" | "no" | "n" | "0" | "off" => Some(false),
+            _ => None,
+        }.context("Failed to parse 'auto launch' key")?;
+        set_auto_startup(auto_launch).context("Failed to set auto launch")?;
 
         info!("\u{2570} Configuration loaded successfully!");
         Ok(Self { name, port, path })
