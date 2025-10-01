@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=AirDropPro
+Comment=A file transfer and clipboard synchronization tool between Windows/Linux(GTK) and iOS devices implemented by Rust and Shortcuts.
+Exec=/usr/bin/AirDropPro
+Icon=AirDropPro
+Terminal=false
+Type=Application
+Categories=Utility;
+StartupNotify=false

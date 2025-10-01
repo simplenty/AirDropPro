@@ -35,5 +35,7 @@ copyright = "file://LICENSE"
 depends = ["libgtk-3-dev", "libxdo-dev", "libayatana-appindicator3-dev"]
 section = "utilities"
 assets = [
-    ["target/release/AirDropPro", "/usr/bin/", "755"]
+    ["target/release/AirDropPro", "/usr/bin/", "755"],
+    ["assets/AirDropPro.png", "/usr/share/icons/hicolor/256x256/apps/", "644"],
+    ["assets/AirDropPro.desktop", "/usr/share/applications/", "644"]
 ]
