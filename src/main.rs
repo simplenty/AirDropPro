@@ -10,6 +10,8 @@ mod utils;
 fn main() {
     logger::initialize();
 
+    utils::ensure_single_instance("AirDropPro").log_and_exit("Failed to ensure single instance");
+
     let config = config::Config::new().log_and_exit("Failed to load config");
 
     mdns::publish_service(&config.name, config.port).log_and_exit("Failed to publish mDNS service");

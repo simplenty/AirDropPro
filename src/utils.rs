@@ -4,7 +4,9 @@ use base64::Engine;
 use base64::engine::general_purpose;
 use env::current_exe;
 use image::{ImageBuffer, ImageFormat, Rgba};
+use native_dialog::{DialogBuilder, MessageLevel};
 use rouille::percent_encoding::percent_encode;
+use single_instance::SingleInstance;
 use std::env;
 use std::fs::create_dir_all;
 use std::io::Cursor;
@@ -120,5 +122,25 @@ pub fn set_auto_startup(status: bool) -> Result<()> {
                 .context("Failed to disable autolaunch")?;
         }
     }
+    Ok(())
+}
+
+pub fn ensure_single_instance(instance_name: &str) -> Result<()> {
+    let instance = SingleInstance::new(instance_name).context("Failed to register an instance")?;
+    if !instance.is_single() {
+        let message = format!(
+            "An instance of '{}' is already running. The new instance will exit immediately.",
+            instance_name
+        );
+        DialogBuilder::message()
+            .set_level(MessageLevel::Info)
+            .set_title(instance_name)
+            .set_text(message)
+            .alert()
+            .show()
+            .context("Failed to show dialog")?;
+        std::process::exit(1);
+    }
+    let _lock: &'static SingleInstance = Box::leak(Box::new(instance));
     Ok(())
 }
