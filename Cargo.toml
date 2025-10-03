@@ -25,6 +25,9 @@ single-instance = "0.3.3"
 tao = "0.34.3"
 tray-icon = "0.21.1"
 
+[build-dependencies]
+winres = "0.1.12"
+
 [profile.release]
 opt-level = 'z'
 lto = true
