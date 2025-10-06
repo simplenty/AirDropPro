@@ -18,6 +18,7 @@ use std::thread;
 fn success(msg: &str) {
     info!("\u{2570} Response: {}.", msg);
     Notification::new()
+        .appname("app.airdroppro.desktop")
         .summary("AirDropPro Success")
         .body(msg)
         .timeout(Timeout::Milliseconds(5000))
@@ -32,6 +33,7 @@ fn failed(err: anyhow::Error) -> Response {
     error!("Error: {:?}", err);
 
     Notification::new()
+        .appname("app.airdroppro.desktop")
         .summary("AirDropPro Error")
         .body(&user_msg)
         .timeout(Timeout::Milliseconds(5000))
