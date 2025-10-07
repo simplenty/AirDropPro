@@ -2,6 +2,8 @@
 name = "AirDropPro"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+description = "A file transfer and clipboard synchronization tool between Windows/Linux(GTK) and iOS devices implemented by Rust and Shortcuts."
 
 [dependencies]
 anyhow = "1.0.99"
@@ -42,5 +44,6 @@ section = "utilities"
 assets = [
     ["target/release/AirDropPro", "/usr/bin/", "755"],
     ["assets/AirDropPro.png", "/usr/share/icons/hicolor/256x256/apps/", "644"],
-    ["assets/AirDropPro.desktop", "/usr/share/applications/", "644"]
+    ["assets/app.airdroppro.desktop", "/usr/share/applications/", "644"],
+    ["assets/airdroppro.appdata.xml", "usr/share/metainfo/", "644"]
 ]

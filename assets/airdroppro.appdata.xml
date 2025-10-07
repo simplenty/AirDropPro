@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+    <id>app.airdroppro.desktop</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>MIT OR Apache-2.0</project_license>
+    <name>AirDropPro</name>
+    <summary>A file transfer and clipboard synchronization tool between Windows/Linux(GTK) and iOS devices implemented by Rust and Shortcuts.</summary>
+    <description>
+        <p>AirDropPro is a Rust-based tool for seamless file transfer and clipboard synchronization between Windows, Linux (GTK), and iOS devices.</p>
+    </description>
+    <url type="homepage">https://github.com/simplenty/AirDropPro</url>
+    <developer_name>Simplenty</developer_name>
+    <update_contact>simplenty@icloud.com</update_contact>
+    <content_rating type="oars-1.1"/>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://github.com/simplenty/AirDropPro/blob/main/assets/screenshot.png?raw=true</image>
+        </screenshot>
+    </screenshots>
+    <categories>
+        <category>Network</category>
+        <category>FileTransfer</category>
+        <category>Utility</category>
+    </categories>
+    <keywords>
+        <keyword>file</keyword>
+        <keyword>transfer</keyword>
+        <keyword>clipboard</keyword>
+        <keyword>sync</keyword>
+    </keywords>
+    <releases>
+        <release version="1.0.0" date="2025-10-07">
+            <description>
+                <p>Initial release</p>
+            </description>
+        </release>
+    </releases>
+</component>
