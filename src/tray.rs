@@ -2,6 +2,7 @@ use crate::utils::get_config_path;
 use anyhow::{Context, Result};
 use image::ImageFormat;
 use log::{error, info};
+use std::rc::Rc;
 use tao::{
     event::Event,
     event_loop::{ControlFlow, EventLoopBuilder},
@@ -39,10 +40,10 @@ pub fn start_gui_tray() -> Result<()> {
         .context("Failed to create icon from RGBA data.")?;
 
     let tray_menu = Menu::new();
-    let open_item = MenuItem::new("Open Config File", true, None);
-    let quit_item = MenuItem::new("Quit", true, None);
-    tray_menu.append(&open_item).ok();
-    tray_menu.append(&quit_item).ok();
+    let open_item = Rc::new(MenuItem::new("Open Config File", true, None));
+    let quit_item = Rc::new(MenuItem::new("Quit", true, None));
+    tray_menu.append(&*open_item).ok();
+    tray_menu.append(&*quit_item).ok();
 
     let _tray_icon = TrayIconBuilder::new()
         .with_menu(Box::new(tray_menu))
@@ -51,7 +52,7 @@ pub fn start_gui_tray() -> Result<()> {
         .context("Failed to build tray icon.")?;
 
     event_loop.run(move |event, _, control_flow| {
-        *control_flow = ControlFlow::Poll;
+        *control_flow = ControlFlow::Wait;
         if let Event::UserEvent(user_event) = event {
             match user_event {
                 UserEvent::TrayIconEvent(tray_event) => {
