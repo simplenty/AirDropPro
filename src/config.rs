@@ -1,9 +1,12 @@
 use crate::utils::{get_config_path, resolve_base_directory, set_auto_startup};
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, ensure};
 use configparser::ini::Ini;
 use log::info;
 use std::fs::write;
 use std::path::PathBuf;
+use std::sync::OnceLock;
+
+static CONFIG: OnceLock<Config> = OnceLock::new();
 
 pub struct Config {
     pub name: String,
@@ -14,7 +17,10 @@ pub struct Config {
 impl Config {
     pub fn new() -> Result<Self> {
         let config_path = get_config_path().context("Failed to get config path")?;
-        info!("\u{256D} Loading config on path {:?}.", config_path.display());
+        info!(
+            "\u{256D} Loading config on path {:?}.",
+            config_path.display()
+        );
         if !config_path.exists() {
             info!("Failed to: {:?}", config_path);
             const DEFAULT_CONFIG_BYTES: &[u8] = include_bytes!("../config.ini");
@@ -59,10 +65,29 @@ impl Config {
             "true" | "t" | "yes" | "y" | "1" | "on" => Some(true),
             "false" | "f" | "no" | "n" | "0" | "off" => Some(false),
             _ => None,
-        }.context("Failed to parse 'auto launch' key")?;
+        }
+        .context("Failed to parse 'auto launch' key")?;
         set_auto_startup(auto_launch).context("Failed to set auto launch")?;
 
         info!("\u{2570} Configuration loaded successfully!");
         Ok(Self { name, port, path })
+    }
+
+    pub fn init() -> Result<()> {
+        let config = Self::new()?;
+        CONFIG
+            .set(config)
+            .map_err(|_| anyhow::anyhow!("Config already initialized"))?;
+
+        ensure!(
+            CONFIG.get().is_some(),
+            "Failed to ensure the CONFIG isn't None"
+        );
+
+        Ok(())
+    }
+
+    pub fn get() -> &'static Self {
+        CONFIG.get().unwrap()
     }
 }

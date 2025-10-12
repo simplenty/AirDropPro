@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::utils::{
     base64_decode, base64_encode, clean_path_string, create_unique_file_path,
     encode_image_to_base64_png, url_encode,
@@ -12,7 +13,6 @@ use rouille::{Request, Response, router};
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use std::sync::Arc;
 use std::thread;
 
 fn success(msg: &str) {
@@ -72,9 +72,10 @@ fn get_file_handler(_request: &Request, encoded_filepath: String) -> Result<Resp
         .with_additional_header("Content-Disposition", content_disposition_header))
 }
 
-fn post_file_handler(request: &Request, destination_path: &PathBuf) -> Result<Response> {
+fn post_file_handler(request: &Request) -> Result<Response> {
     let mut multipart_data = rouille::input::multipart::get_multipart_input(request)
         .context("Failed to parse multipart input")?;
+    let destination_path = &Config::get().path;
 
     while let Some(mut field) = multipart_data.next() {
         if let Some(original_filename) = field.headers.filename {
@@ -220,14 +221,12 @@ fn page_not_found_handler() -> Response {
     Response::empty_404()
 }
 
-pub fn publish_server(port: u16, file_storage_path: PathBuf) -> Result<()> {
+pub fn publish_server() -> Result<()> {
+    let port = Config::get().port;
     let address = format!("0.0.0.0:{}", port);
+
     info!("\u{256D} Starting server on {}", address);
-
-    let file_storage_path_arc = Arc::new(file_storage_path);
-
     thread::spawn(move || {
-        let file_storage_path_clone = Arc::clone(&file_storage_path_arc);
         rouille::start_server(address, move |request| {
             info!(
                 "\u{256D} Received request: {} {} from {:?}",
@@ -245,7 +244,7 @@ pub fn publish_server(port: u16, file_storage_path: PathBuf) -> Result<()> {
                     get_file_handler(request, path).unwrap_or_else(failed)
                 },
                 (POST) (/file) => {
-                    post_file_handler(request, &file_storage_path_clone).unwrap_or_else(failed)
+                    post_file_handler(request).unwrap_or_else(failed)
                 },
                 (GET) (/clipboard) => {
                     get_clipboard_handler(request).unwrap_or_else(failed)

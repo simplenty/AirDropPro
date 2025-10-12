@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use std::net::IpAddr;
 use std::thread;
 use std::time::Duration;
+use crate::config::Config;
 
 pub fn wait_for_local_ip() -> Result<IpAddr> {
     let mut ip: Option<IpAddr> = None;
@@ -22,7 +23,10 @@ pub fn wait_for_local_ip() -> Result<IpAddr> {
     Ok(ip.unwrap())
 }
 
-pub fn publish_service(host_name: &str, port: u16) -> Result<()> {
+pub fn publish_service() -> Result<()> {
+    let host_name = Config::get().name.as_str();
+    let port = Config::get().port;
+
     let service_type = "_http._tcp.local.";
     let service_name = "AirDropPro";
     info!(
